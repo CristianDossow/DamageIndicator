@@ -1,0 +1,11 @@
+# Use %health% for the regain health you get 
+# Use %damage% for the damage you get
+Format:
+  EntityRegain: '&7+&a%health%'
+  EntityDamage: '&7-&c%damage%'
+  
+# Which entities you want to use?
+UseAt:
+  Player: true
+  Monster: true
+  Animals: false

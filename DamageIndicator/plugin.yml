@@ -1,0 +1,12 @@
+name: DamageIndicator
+main: cl.mastercode.DamageIndicator.Main
+author: CristianDossow
+version: 1.1.0
+commands:
+  DamageIndicator:
+    description: Main DamageIndicator command
+    usage: /<command> <arguments>
+    aliases: di
+permissions:
+  damageindicator.admin:
+    description: Access to admin commands
