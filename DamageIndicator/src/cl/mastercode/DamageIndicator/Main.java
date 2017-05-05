@@ -178,7 +178,7 @@ implements Listener {
     public void onEntityRegenrateHealth(EntityRegainHealthEvent e) {
         ArmorStand as;
         String cfgFormat = this.cfg.getString("Format.EntityRegain");
-        String displayFormat = cfgFormat.replace("&", "\u00a7").replace("%health%", "" + (int)e.getAmount());
+        String displayFormat = cfgFormat.replace("&", "§").replace("%health%", "" + (int)e.getAmount());
         boolean enablePlayer = this.cfg.getBoolean("UseAt.Player");
         boolean enableMonster = this.cfg.getBoolean("UseAt.Monster");
         boolean enableAnimal = this.cfg.getBoolean("UseAt.Animals");
@@ -226,7 +226,7 @@ implements Listener {
         }
         ArmorStand as;
         String cfgFormat = this.cfg.getString("Format.EntityDamage");
-        String displayFormat = cfgFormat.replace("&", "\u00a7").replace("%damage%", "" + (int)e.getDamage());
+        String displayFormat = cfgFormat.replace("&", "§").replace("%damage%", "" + (int)e.getDamage());
         boolean enablePlayer = this.cfg.getBoolean("UseAt.Player");
         boolean enableMonster = this.cfg.getBoolean("UseAt.Monster");
         boolean enableAnimal = this.cfg.getBoolean("UseAt.Animals");
