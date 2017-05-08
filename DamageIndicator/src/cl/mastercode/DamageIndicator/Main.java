@@ -69,6 +69,8 @@ implements Listener {
         command2.setExecutor(new CommandHandler());
         command3.setExecutor(new CommandHandler());
         
+        
+        
         Bukkit.getScheduler().runTaskTimer((Plugin)this.plugin, new Runnable(){
             @Override
             public void run() {
@@ -89,7 +91,7 @@ implements Listener {
             		}
             	}
             }
-        }, 1,1);
+        }, 6,1);
     }
     
     @Override
@@ -111,16 +113,26 @@ implements Listener {
     
     public static ArmorStand getDefaultArmorStand(Location loc) {
     	ArmorStand as;
-        as = (ArmorStand)loc.getWorld().spawnEntity(loc.add(0.0, 1.6, 0.0), EntityType.ARMOR_STAND);
+    	Location spawnLoc = new Location(loc.getWorld(),loc.getX(),500,loc.getZ());
+    	as = (ArmorStand)loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
+        //as = (ArmorStand)loc.getWorld().spawnEntity(loc.add(0.0, 1.6, 0.0), EntityType.ARMOR_STAND);
         as.setVisible(false);
+        as.setCustomNameVisible(false);
         as.setInvulnerable(true);
         as.setSmall(true);
         as.setRemoveWhenFarAway(true);
         as.setMetadata("Mastercode-DamageIndicator",new FixedMetadataValue(splugin, 1));
-        as.setCustomNameVisible(true);
         as.setGravity(false);
         as.setCollidable(false);
         as.setMarker(true);
+        as.teleport(loc.add(0.0, 1.6, 0.0));
+        //as.setCustomNameVisible(true);
+        Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)Main.splugin, new Runnable(){
+            @Override
+            public void run() {
+            	as.setCustomNameVisible(true);
+            }
+        },7);
 		return as;
     }
     public boolean isDamageIndicator(ArmorStand as){
@@ -129,7 +141,7 @@ implements Listener {
     	}
     	if(as.isInvulnerable()
     			&&as.isSmall()
-    			&&as.isCustomNameVisible()
+    			//&&as.isCustomNameVisible()
     			&&!as.hasGravity()
     			&&as.isMarker()
     			&&!as.isVisible()){

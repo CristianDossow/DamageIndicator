@@ -2,6 +2,7 @@ package cl.mastercode.DamageIndicator;
 
 import java.util.Iterator;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -78,7 +79,8 @@ public final class CommandHandler implements CommandExecutor {
 	        	}
 	        }
         }else{
-        	sender.sendMessage(ChatColor.DARK_AQUA+"<===== Damage Indicator =====>");
+        	String version = Bukkit.getServer().getPluginManager().getPlugin("DamageIndicator").getDescription().getVersion();
+        	sender.sendMessage(ChatColor.DARK_AQUA+"<===== Damage Indicator "+version+" =====>");
         	sender.sendMessage(ChatColor.DARK_AQUA+"/di reload");
         	sender.sendMessage(ChatColor.DARK_AQUA+"/di clear <range> "+ChatColor.AQUA+"#remove the damage indicators in the range");
         	sender.sendMessage(ChatColor.DARK_AQUA+"/di clearall "+ChatColor.AQUA+"#remove the damage indicators in the world (may cause lag)");
