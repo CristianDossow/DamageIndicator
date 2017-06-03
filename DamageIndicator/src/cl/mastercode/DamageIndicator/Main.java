@@ -48,7 +48,7 @@ implements Listener {
         this.file = new File(this.getDataFolder() + "/", "settings.yml");
         this.cfg = YamlConfiguration.loadConfiguration((File)this.file);
         armorStands = new HashMap<>();
-        this.getServer().getPluginManager().registerEvents((Listener)this, (Plugin)this);
+        
         if (!this.file.exists()) {
             this.saveResource("settings.yml", false);
         }
@@ -61,7 +61,7 @@ implements Listener {
         splugin= this;
         
         reload();
-        
+        this.getServer().getPluginManager().registerEvents((Listener)this, (Plugin)this);
         PluginCommand command1 = getCommand("DamageIndicator");
         PluginCommand command2 = getCommand("damageindicator");
         PluginCommand command3 = getCommand("di");
