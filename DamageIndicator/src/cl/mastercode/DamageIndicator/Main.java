@@ -62,14 +62,7 @@ implements Listener {
         
         reload();
         this.getServer().getPluginManager().registerEvents((Listener)this, (Plugin)this);
-        PluginCommand command1 = getCommand("DamageIndicator");
-        PluginCommand command2 = getCommand("damageindicator");
-        PluginCommand command3 = getCommand("di");
-        command1.setExecutor(new CommandHandler());
-        command2.setExecutor(new CommandHandler());
-        command3.setExecutor(new CommandHandler());
-        
-        
+        getCommand("damageindicator").setExecutor(new CommandHandler());
         
         Bukkit.getScheduler().runTaskTimer((Plugin)this.plugin, new Runnable(){
             @Override
@@ -84,7 +77,6 @@ implements Listener {
             			else{
             				entry.getKey().teleport(entry.getKey().getLocation().add(0.0, 0.07, 0.0));
             			}
-            			
             		}
             		for(ArmorStand as : asl) {
             			armorStands.remove(as);
@@ -96,26 +88,25 @@ implements Listener {
     
     @Override
     public void onDisable() {
-		for(Entry<ArmorStand, Long> entry : armorStands.entrySet()) {
-			entry.getKey().remove();
-		}
-		int c =0;
-		for(World world: Bukkit.getWorlds()){
-    		for(ArmorStand as : world.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)){
-    			if(Main.splugin.isDamageIndicator(as)){
-    				as.remove();
-    				c++;
-				}
-    		}
-		}
-		console.sendMessage("§c"+c+" Damage Indicators were removed in plugin unload"+"");
+        for(Entry<ArmorStand, Long> entry : armorStands.entrySet()) {
+            entry.getKey().remove();
+        }
+        int c = 0;
+        for(World world: Bukkit.getWorlds()){
+            for(ArmorStand as : world.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
+                if(Main.splugin.isDamageIndicator(as)){
+                    as.remove();
+                    c++;
+                }
+            }
+        }
+        console.sendMessage("§c"+c+" Damage Indicators were removed in plugin unload"+"");
     }
     
     public static ArmorStand getDefaultArmorStand(Location loc) {
     	ArmorStand as;
     	Location spawnLoc = new Location(loc.getWorld(),loc.getX(),500,loc.getZ());
     	as = (ArmorStand)loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
-        //as = (ArmorStand)loc.getWorld().spawnEntity(loc.add(0.0, 1.6, 0.0), EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setCustomNameVisible(false);
         as.setInvulnerable(true);
@@ -126,7 +117,6 @@ implements Listener {
         as.setCollidable(false);
         as.setMarker(true);
         as.teleport(loc.add(0.0, 1.6, 0.0));
-        //as.setCustomNameVisible(true);
         Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin)Main.splugin, new Runnable(){
             @Override
             public void run() {
@@ -139,15 +129,11 @@ implements Listener {
     	if(as.hasMetadata("Mastercode-DamageIndicator")){
     		return true;
     	}
-    	if(as.isInvulnerable()
-    			&&as.isSmall()
-    			//&&as.isCustomNameVisible()
-    			&&!as.hasGravity()
-    			&&as.isMarker()
-    			&&!as.isVisible()){
-    		return true;
-    	}
-    	return false;
+    	return as.isInvulnerable() 
+                && as.isSmall()
+                && !as.hasGravity() 
+                && as.isMarker() 
+                && !as.isVisible();
     }
     public boolean isOldDamageIndicator(ArmorStand as){
     	if(as.isCustomNameVisible()
@@ -164,7 +150,7 @@ implements Listener {
     @EventHandler()
     public void RemoveArmorStandsOnChunkUnload(ChunkUnloadEvent event) {
     	for(Entity entity : event.getChunk().getEntities()){
-        	if(entity.equals(EntityType.ARMOR_STAND)){
+        	if(entity.getType().equals(EntityType.ARMOR_STAND)){
         		ArmorStand as = (ArmorStand)entity;
         		if(isDamageIndicator(as)){
         			armorStands.remove(as);
@@ -176,7 +162,7 @@ implements Listener {
     @EventHandler()
     public void RemoveArmorStandsOnChunkload(ChunkLoadEvent event) {
     	for(Entity entity : event.getChunk().getEntities()){
-        	if(entity.equals(EntityType.ARMOR_STAND)){
+        	if(entity.getType().equals(EntityType.ARMOR_STAND)){
         		ArmorStand as = (ArmorStand)entity;
         		if(isDamageIndicator(as)){
         			armorStands.remove(as);
