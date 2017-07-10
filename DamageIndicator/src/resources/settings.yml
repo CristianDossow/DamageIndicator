@@ -3,6 +3,7 @@
 Format:
   EntityRegain: '&7+&a%health%'
   EntityDamage: '&7-&c%damage%'
+  Decimal: '#.#'
   
 # Which entities you want to use?
 UseAt:
