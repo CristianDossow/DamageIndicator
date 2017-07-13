@@ -3,10 +3,10 @@ main: cl.mastercode.DamageIndicator.Main
 author: CristianDossow
 version: ${project.version}
 commands:
-  DamageIndicator:
+  damageindicator:
     description: Main DamageIndicator command
     usage: /<command> <arguments>
-    aliases: di
+    aliases: [di, DamageIndicator]
 permissions:
   damageindicator.admin:
     description: Access to admin commands
