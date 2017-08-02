@@ -217,7 +217,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityDamageEvent(EntityDamageEvent e) {
-        if (e.getDamage() < 1 || e.isCancelled()) {
+        if (e.isCancelled()) {
             return;
         }
         ArmorStand as;
