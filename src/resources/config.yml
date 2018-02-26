@@ -4,7 +4,7 @@ Format:
   EntityRegain: '&7+&a%health%'
   EntityDamage: '&7-&c%damage%'
   # Here you define the decimal format for the damage and health
-  # See https://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html for more information
+  # See https://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html for more information
   Decimal: '#.#'
   
 # Which entities you want to use?

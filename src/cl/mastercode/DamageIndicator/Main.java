@@ -1,21 +1,13 @@
 package cl.mastercode.DamageIndicator;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -32,62 +24,38 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
-    public Main plugin;
-    static public Main splugin;
-    File file;
-    YamlConfiguration cfg;
-    static public Map<ArmorStand, Long> armorStands;
-    public static final ConsoleCommandSender console = Bukkit.getConsoleSender();
+    public static Main plugin;
+    private static Map<ArmorStand, Long> armorStands;
+    private final ConsoleCommandSender console = Bukkit.getConsoleSender();
 
     public void reload() {
-        this.file = new File(this.getDataFolder() + "/", "settings.yml");
-        this.cfg = YamlConfiguration.loadConfiguration((File) this.file);
         armorStands = new HashMap<>();
-
-        if (!this.file.exists()) {
-            this.saveResource("settings.yml", false);
-        }
-        System.out.println("Load Complete");
+        saveResource("config.yml", false);
     }
 
     @Override
     public void onEnable() {
-        this.plugin = this;
-        splugin = this;
+        plugin = this;
 
         reload();
-        this.getServer().getPluginManager().registerEvents((Listener) this, (Plugin) this);
+        getServer().getPluginManager().registerEvents(this, this);
         getCommand("damageindicator").setExecutor(new CommandHandler());
 
-        Bukkit.getScheduler().runTaskTimer((Plugin) this.plugin, () -> {
-            if (armorStands.size() > 0) {
-                List<ArmorStand> asl = new ArrayList<>();
-                armorStands.entrySet().forEach((entry) -> {
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!armorStands.isEmpty()) {
+                armorStands.entrySet().forEach(entry -> {
                     if (entry.getValue() + 1500 < System.currentTimeMillis()) {
                         entry.getKey().remove();
-                        asl.add(entry.getKey());
                     } else {
                         entry.getKey().teleport(entry.getKey().getLocation().add(0.0, 0.07, 0.0));
                     }
                 });
-                asl.forEach((as) -> {
-                    armorStands.remove(as);
-                });
             }
         }, 6, 1);
-        if (cfg.getString("Format.Decimal") == null || cfg.getString("Format.Decimal").equals("")) {
-            try {
-                cfg.set("Format.Decimal", "#.#");
-                cfg.save(file);
-            } catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     @Override
@@ -97,29 +65,28 @@ public class Main extends JavaPlugin implements Listener {
         });
         int c = 0;
         for (World world : Bukkit.getWorlds()) {
-            c = world.getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.splugin.isDamageIndicator(as))).map((as) -> {
+            c = world.getEntitiesByClass(ArmorStand.class).stream().filter(as -> isDamageIndicator(as)).map(as -> {
                 as.remove();
                 return as;
-            }).map((_item) -> 1).reduce(c, Integer::sum);
+            }).map(i -> 1).reduce(c, Integer::sum);
         }
         console.sendMessage("§c" + c + " Damage Indicators were removed in plugin unload" + "");
     }
 
-    public static ArmorStand getDefaultArmorStand(Location loc) {
-        ArmorStand as;
+    public ArmorStand getDefaultArmorStand(Location loc) {
         Location spawnLoc = new Location(loc.getWorld(), loc.getX(), 500, loc.getZ());
-        as = (ArmorStand) loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
+        ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setCustomNameVisible(false);
         as.setInvulnerable(true);
         as.setSmall(true);
         as.setRemoveWhenFarAway(true);
-        as.setMetadata("Mastercode-DamageIndicator", new FixedMetadataValue(splugin, 1));
+        as.setMetadata("Mastercode-DamageIndicator", new FixedMetadataValue(plugin, 1));
         as.setGravity(false);
         as.setCollidable(false);
         as.setMarker(true);
         as.teleport(loc.add(0.0, 1.6, 0.0));
-        Bukkit.getScheduler().scheduleSyncDelayedTask((Plugin) Main.splugin, () -> {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             as.setCustomNameVisible(true);
         }, 7);
         return as;
@@ -170,14 +137,14 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEntityRegenrateHealth(EntityRegainHealthEvent e) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityRegainHealth(EntityRegainHealthEvent e) {
         ArmorStand as;
-        String cfgFormat = this.cfg.getString("Format.EntityRegain");
+        String cfgFormat = getConfig().getString("Format.EntityRegain");
         String displayFormat = cfgFormat.replace("&", "§").replace("%health%", damageFormat(e.getAmount()));
-        boolean enablePlayer = this.cfg.getBoolean("UseAt.Player");
-        boolean enableMonster = this.cfg.getBoolean("UseAt.Monster");
-        boolean enableAnimal = this.cfg.getBoolean("UseAt.Animals");
+        boolean enablePlayer = getConfig().getBoolean("UseAt.Player");
+        boolean enableMonster = getConfig().getBoolean("UseAt.Monster");
+        boolean enableAnimal = getConfig().getBoolean("UseAt.Animals");
         if (e.getEntity() instanceof Player && enablePlayer && !e.isCancelled() && e.getAmount() < 1.0) {
             if (e.getEntity().hasMetadata("NPC")) {
                 return;
@@ -215,19 +182,18 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamageEvent(EntityDamageEvent e) {
         if (e.isCancelled()) {
             return;
         }
         ArmorStand as;
-        String cfgFormat = this.cfg.getString("Format.EntityDamage");
-        String displayFormat = cfgFormat.replace("&", "§").replace("%damage%", damageFormat(e.getDamage()));
-        boolean enablePlayer = this.cfg.getBoolean("UseAt.Player");
-        boolean enableMonster = this.cfg.getBoolean("UseAt.Monster");
-        boolean enableAnimal = this.cfg.getBoolean("UseAt.Animals");
-        boolean enableBlood = this.cfg.getBoolean("BloodEffect");
-        if (enableBlood && !e.isCancelled() && e.getDamage() < 1.0 && (e.getEntity().getType() != EntityType.ARMOR_STAND || e.getEntity().getType() != EntityType.PAINTING || e.getEntity().getType() != EntityType.ITEM_FRAME) && (e.getEntity() instanceof Player || e.getEntity() instanceof Monster || e.getEntity() instanceof Animals || e.getEntity() instanceof Slime || e.getEntity() instanceof MagmaCube)) {
+        String cfgFormat = getConfig().getString("Format.EntityDamage");
+        String displayFormat = cfgFormat.replace("&", "§").replace("%damage%", damageFormat(e.getFinalDamage()));
+        boolean enablePlayer = getConfig().getBoolean("UseAt.Player");
+        boolean enableMonster = getConfig().getBoolean("UseAt.Monster");
+        boolean enableAnimal = getConfig().getBoolean("UseAt.Animals");
+        if (!e.isCancelled() && e.getDamage() < 1.0 && (e.getEntity().getType() != EntityType.ARMOR_STAND || e.getEntity().getType() != EntityType.PAINTING || e.getEntity().getType() != EntityType.ITEM_FRAME) && (e.getEntity() instanceof Player || e.getEntity() instanceof Monster || e.getEntity() instanceof Animals || e.getEntity() instanceof Slime || e.getEntity() instanceof MagmaCube)) {
             if (e.getEntity().hasMetadata("NPC")) {
                 return;
             }
@@ -276,7 +242,7 @@ public class Main extends JavaPlugin implements Listener {
     private String damageFormat(Object o) {
         DecimalFormat df;
         try {
-            df = new DecimalFormat(cfg.getString("Format.Decimal"));
+            df = new DecimalFormat(getConfig().getString("Format.Decimal"));
         } catch (Exception ex) {
             df = new DecimalFormat("#.#");
         }

@@ -10,14 +10,12 @@ import org.bukkit.entity.Player;
 
 public final class CommandHandler implements CommandExecutor {
 
-    String noPermission = ChatColor.DARK_RED + "You don't have permission to do this!";
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String string, String[] strings) {
         if (strings.length > 0) {
             if ("reload".equalsIgnoreCase(strings[0])) {
                 if (CheckPermissions(sender, "damageindicator.admin")) {
-                    Main.splugin.reload();
+                    Main.plugin.reload();
                     sender.sendMessage(ChatColor.GREEN + "Reloaded config!");
                     return true;
                 }
@@ -28,7 +26,7 @@ public final class CommandHandler implements CommandExecutor {
                     int range = GetInt(sender, strings[1]);
                     if (range >= 0) {
                         int c = 0;
-                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && Main.splugin.isDamageIndicator((ArmorStand) entity))).map((entity) -> {
+                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && Main.plugin.isDamageIndicator((ArmorStand) entity))).map((entity) -> {
                             entity.remove();
                             return entity;
                         }).map((_item) -> 1).reduce(c, Integer::sum);
@@ -39,7 +37,7 @@ public final class CommandHandler implements CommandExecutor {
             } else if ("clearall".equalsIgnoreCase(strings[0])) {
                 if (IsPlayer(sender) && (CheckPermissions(sender, "damageindicator.admin"))) {
                     int c = 0;
-                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.splugin.isDamageIndicator(as))).map((as) -> {
+                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.plugin.isDamageIndicator(as))).map((as) -> {
                         as.remove();
                         return as;
                     }).map((_item) -> 1).reduce(c, Integer::sum);
