@@ -1,5 +1,6 @@
 package cl.mastercode.DamageIndicator;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,13 +29,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 
-    public static Main plugin;
-    private static Map<ArmorStand, Long> armorStands;
+    private static Main plugin;
+    private Map<ArmorStand, Long> armorStands;
     private final ConsoleCommandSender console = Bukkit.getConsoleSender();
 
     public void reload() {
+        armorStands.forEach((armor, time) -> armor.remove());
         armorStands = new HashMap<>();
-        saveResource("config.yml", false);
+        if (!new File(getDataFolder(), "config.yml").exists()) {
+            saveResource("config.yml", false);
+        }
+    }
+
+    public static Main getInstance() {
+        return plugin;
     }
 
     @Override
@@ -55,7 +63,7 @@ public class Main extends JavaPlugin implements Listener {
                     }
                 });
             }
-        }, 6, 1);
+        }, 0, 1);
     }
 
     @Override

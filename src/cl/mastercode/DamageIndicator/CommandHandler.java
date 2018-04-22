@@ -15,7 +15,7 @@ public final class CommandHandler implements CommandExecutor {
         if (strings.length > 0) {
             if ("reload".equalsIgnoreCase(strings[0])) {
                 if (CheckPermissions(sender, "damageindicator.admin")) {
-                    Main.plugin.reload();
+                    Main.getInstance().reload();
                     sender.sendMessage(ChatColor.GREEN + "Reloaded config!");
                     return true;
                 }
@@ -26,7 +26,7 @@ public final class CommandHandler implements CommandExecutor {
                     int range = GetInt(sender, strings[1]);
                     if (range >= 0) {
                         int c = 0;
-                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && Main.plugin.isDamageIndicator((ArmorStand) entity))).map((entity) -> {
+                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && Main.getInstance().isDamageIndicator((ArmorStand) entity))).map((entity) -> {
                             entity.remove();
                             return entity;
                         }).map((_item) -> 1).reduce(c, Integer::sum);
@@ -37,7 +37,7 @@ public final class CommandHandler implements CommandExecutor {
             } else if ("clearall".equalsIgnoreCase(strings[0])) {
                 if (IsPlayer(sender) && (CheckPermissions(sender, "damageindicator.admin"))) {
                     int c = 0;
-                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.plugin.isDamageIndicator(as))).map((as) -> {
+                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.getInstance().isDamageIndicator(as))).map((as) -> {
                         as.remove();
                         return as;
                     }).map((_item) -> 1).reduce(c, Integer::sum);
