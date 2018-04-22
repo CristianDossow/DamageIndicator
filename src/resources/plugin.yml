@@ -1,6 +1,7 @@
 name: DamageIndicator
 main: cl.mastercode.DamageIndicator.Main
-author: CristianDossow, Beelzebu
+author: CristianDossow
+authors: [Beelzebu]
 version: ${project.version}
 commands:
   damageindicator:
