@@ -30,7 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin implements Listener {
 
     private static Main plugin;
-    private Map<ArmorStand, Long> armorStands;
+    private Map<ArmorStand, Long> armorStands = new HashMap<>();
     private final ConsoleCommandSender console = Bukkit.getConsoleSender();
 
     public void reload() {
