@@ -1,5 +1,22 @@
-package cl.mastercode.DamageIndicator;
+/**
+ * Copyright 2018 YitanTribal & Beelzebu
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package cl.mastercode.DamageIndicator.command;
 
+import cl.mastercode.DamageIndicator.Main;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -8,14 +25,21 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
+/**
+ *
+ * @author YitanTribal
+ */
+@RequiredArgsConstructor
 public final class CommandHandler implements CommandExecutor {
+
+    private final Main plugin;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String string, String[] strings) {
         if (strings.length > 0) {
             if ("reload".equalsIgnoreCase(strings[0])) {
                 if (CheckPermissions(sender, "damageindicator.admin")) {
-                    Main.getInstance().reload();
+                    plugin.reload();
                     sender.sendMessage(ChatColor.GREEN + "Reloaded config!");
                     return true;
                 }
@@ -26,7 +50,7 @@ public final class CommandHandler implements CommandExecutor {
                     int range = GetInt(sender, strings[1]);
                     if (range >= 0) {
                         int c = 0;
-                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && Main.getInstance().isDamageIndicator((ArmorStand) entity))).map((entity) -> {
+                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && plugin.isDamageIndicator((ArmorStand) entity))).map((entity) -> {
                             entity.remove();
                             return entity;
                         }).map((_item) -> 1).reduce(c, Integer::sum);
@@ -37,7 +61,7 @@ public final class CommandHandler implements CommandExecutor {
             } else if ("clearall".equalsIgnoreCase(strings[0])) {
                 if (IsPlayer(sender) && (CheckPermissions(sender, "damageindicator.admin"))) {
                     int c = 0;
-                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (Main.getInstance().isDamageIndicator(as))).map((as) -> {
+                    c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (plugin.isDamageIndicator(as))).map((as) -> {
                         as.remove();
                         return as;
                     }).map((_item) -> 1).reduce(c, Integer::sum);
@@ -63,7 +87,10 @@ public final class CommandHandler implements CommandExecutor {
                             sender.sendMessage("hasGravity (false) " + as.hasGravity());
                             return as;
                         }).map((as) -> {
-                            sender.sendMessage("isCollidable (false) " + as.isCollidable());
+                            try {
+                                sender.sendMessage("isCollidable (false) " + as.isCollidable());
+                            } catch (Exception oldversion) {
+                            }
                             return as;
                         }).map((as) -> {
                             sender.sendMessage("iisMarker (true) " + as.isMarker());
@@ -72,7 +99,10 @@ public final class CommandHandler implements CommandExecutor {
                             sender.sendMessage("isVisible (false) " + as.isVisible());
                             return as;
                         }).map((as) -> {
-                            sender.sendMessage("isInvulnerable (true) " + as.isInvulnerable());
+                            try {
+                                sender.sendMessage("isInvulnerable (true) " + as.isInvulnerable());
+                            } catch (Exception oldVersion) {
+                            }
                             return as;
                         }).forEachOrdered((as) -> {
                             sender.sendMessage("getRemoveWhenFarAway (true) " + as.getRemoveWhenFarAway());
