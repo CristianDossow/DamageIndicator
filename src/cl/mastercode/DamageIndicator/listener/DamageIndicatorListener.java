@@ -19,9 +19,8 @@ import cl.mastercode.DamageIndicator.DIMain;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.ArmorStand;
@@ -44,12 +43,19 @@ import org.bukkit.metadata.FixedMetadataValue;
  *
  * @author YitanTribal, Beelzebu
  */
-@RequiredArgsConstructor
 public class DamageIndicatorListener implements Listener {
 
     private final DIMain plugin;
     @Getter
     private final LinkedHashMap<ArmorStand, Long> armorStands = new LinkedHashMap<>();
+    private final boolean enablePlayer, enableMonster, enableAnimal;
+
+    public DamageIndicatorListener(DIMain plugin) {
+        this.plugin = plugin;
+        enablePlayer = plugin.getConfig().getBoolean("Damage Indicator.Player");
+        enableMonster = plugin.getConfig().getBoolean("Damage Indicator.Monster");
+        enableAnimal = plugin.getConfig().getBoolean("Damage Indicator.Animals");
+    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChunkUnload(ChunkUnloadEvent event) {
@@ -79,117 +85,48 @@ public class DamageIndicatorListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityRegainHealth(EntityRegainHealthEvent e) {
-        ArmorStand as;
-        String cfgFormat = plugin.getConfig().getString("Format.EntityRegain");
-        String displayFormat = cfgFormat.replace("&", "§").replace("%health%", damageFormat(e.getAmount()));
-        boolean enablePlayer = plugin.getConfig().getBoolean("UseAt.Player");
-        boolean enableMonster = plugin.getConfig().getBoolean("UseAt.Monster");
-        boolean enableAnimal = plugin.getConfig().getBoolean("UseAt.Animals");
-        if (e.getEntity() instanceof Player && enablePlayer && !e.isCancelled() && e.getAmount() < 1.0) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            as = getDefaultArmorStand(e.getEntity().getLocation());
-            as.setCustomName("" + displayFormat);
-            armorStands.put(as, System.currentTimeMillis());
-        }
-        if (e.getEntity() instanceof Monster || e.getEntity() instanceof Slime || e.getEntity() instanceof MagmaCube) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            if (enableMonster) {
-                as = getDefaultArmorStand(e.getEntity().getLocation());
-                as.setCustomName("" + displayFormat);
-                armorStands.put(as, System.currentTimeMillis());
-            }
-        }
-        if (e.getEntity() instanceof Animals && enableAnimal) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            as = getDefaultArmorStand(e.getEntity().getLocation());
-            as.setCustomName("" + displayFormat);
-            armorStands.put(as, System.currentTimeMillis());
+        if (!e.isCancelled()) {
+            handleArmorStand(e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityRegain").replace("%health%", damageFormat(e.getAmount()))), e.getEntity().getLocation());
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamageEvent(EntityDamageEvent e) {
-        if (e.isCancelled()) {
-            return;
-        }
-        ArmorStand as;
-        String cfgFormat = plugin.getConfig().getString("Format.EntityDamage");
-        String displayFormat = cfgFormat.replace("&", "§").replace("%damage%", damageFormat(e.getFinalDamage()));
-        boolean enablePlayer = plugin.getConfig().getBoolean("UseAt.Player");
-        boolean enableMonster = plugin.getConfig().getBoolean("UseAt.Monster");
-        boolean enableAnimal = plugin.getConfig().getBoolean("UseAt.Animals");
-        if (!e.isCancelled() && e.getDamage() < 1.0 && (e.getEntity().getType() != EntityType.ARMOR_STAND || e.getEntity().getType() != EntityType.PAINTING || e.getEntity().getType() != EntityType.ITEM_FRAME) && (e.getEntity() instanceof Player || e.getEntity() instanceof Monster || e.getEntity() instanceof Animals || e.getEntity() instanceof Slime || e.getEntity() instanceof MagmaCube)) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            e.getEntity().getLocation().getWorld().playEffect(e.getEntity().getLocation().add(0.0, 1.0, 0.0), Effect.STEP_SOUND, 152);
-        }
-        if (e.getEntity() instanceof Player && enablePlayer) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            as = getDefaultArmorStand(e.getEntity().getLocation());
-            as.setCustomName("" + displayFormat);
-            armorStands.put(as, System.currentTimeMillis());
-        }
-        if (e.getEntity() instanceof Monster || e.getEntity() instanceof Slime || e.getEntity() instanceof MagmaCube) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            if (enableMonster) {
-                as = getDefaultArmorStand(e.getEntity().getLocation());
-                as.setCustomName("" + displayFormat);
-                armorStands.put(as, System.currentTimeMillis());
-            }
-        }
-        if (e.getEntity() instanceof Animals && enableAnimal) {
-            if (e.getEntity().hasMetadata("NPC")) {
-                return;
-            }
-            if (e.getEntity() instanceof ArmorStand) {
-                return;
-            }
-            as = getDefaultArmorStand(e.getEntity().getLocation());
-            as.setCustomName("" + displayFormat);
-            armorStands.put(as, System.currentTimeMillis());
+        if (!e.isCancelled()) {
+            handleArmorStand(e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityDamage").replace("%damage%", damageFormat(e.getFinalDamage()))), e.getEntity().getLocation());
         }
     }
 
     private String damageFormat(Object o) {
         DecimalFormat df;
         try {
-            df = new DecimalFormat(plugin.getConfig().getString("Format.Decimal"));
+            df = new DecimalFormat(plugin.getConfig().getString("Damage Indicator.Format.Decimal", "#.##"));
         } catch (Exception ex) {
-            df = new DecimalFormat("#.#");
+            df = new DecimalFormat("#.##");
         }
         return df.format(o);
     }
 
-    public ArmorStand getDefaultArmorStand(Location loc) {
+    private void handleArmorStand(Entity entity, String format, Location loc) {
+        if (entity.hasMetadata("NPC")) {
+            return;
+        }
+        if (entity instanceof ArmorStand) {
+            return;
+        }
+        if (entity instanceof Player && !enablePlayer) {
+            return;
+        }
+        if ((entity instanceof Monster || entity instanceof Slime || entity instanceof MagmaCube) && !enableMonster) {
+            return;
+        }
+        if (entity instanceof Animals && !enableAnimal) {
+            return;
+        }
+        armorStands.put(getDefaultArmorStand(loc, format), System.currentTimeMillis());
+    }
+
+    public ArmorStand getDefaultArmorStand(Location loc, String name) {
         Location spawnLoc = new Location(loc.getWorld(), loc.getX(), 500, loc.getZ());
         ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
         as.setVisible(false);
@@ -207,7 +144,8 @@ public class DamageIndicatorListener implements Listener {
         as.teleport(loc.add(0.0, 1.6, 0.0));
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
             as.setCustomNameVisible(true);
-        }, 7);
+        }, 5);
+        as.setCustomName(name);
         return as;
     }
 }

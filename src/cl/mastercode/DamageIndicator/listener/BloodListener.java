@@ -51,7 +51,7 @@ public class BloodListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamage(EntityDamageEvent e) {
-        if (!(e.getEntity() instanceof LivingEntity) || e.getEntity().getType().equals(EntityType.ARMOR_STAND)) {
+        if (e.isCancelled() || !(e.getEntity() instanceof LivingEntity) || e.getEntity().getType().equals(EntityType.ARMOR_STAND)) {
             return;
         }
         e.getEntity().getWorld().spigot().playEffect(((LivingEntity) e.getEntity()).getEyeLocation(), Effect.COLOURED_DUST, 0, 0, 0.4f, 0.3f, 0.4f, 0, 8, 16);

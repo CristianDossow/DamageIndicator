@@ -18,11 +18,18 @@ package cl.mastercode.DamageIndicator;
 import cl.mastercode.DamageIndicator.command.CommandHandler;
 import cl.mastercode.DamageIndicator.listener.BloodListener;
 import cl.mastercode.DamageIndicator.listener.DamageIndicatorListener;
+import com.google.common.base.Charsets;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Item;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,7 +40,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class DIMain extends JavaPlugin {
 
-    private final ConsoleCommandSender console = Bukkit.getConsoleSender();
+    private final File configFile = new File(getDataFolder(), "config.yml");
     private DamageIndicatorListener damageIndicatorListener;
     private BloodListener bloodListener;
 
@@ -42,14 +49,53 @@ public class DIMain extends JavaPlugin {
             damageIndicatorListener.getArmorStands().forEach((armor, time) -> armor.remove());
             damageIndicatorListener.getArmorStands().clear();
         }
-        if (!new File(getDataFolder(), "config.yml").exists()) {
+        if (!configFile.exists()) {
             saveResource("config.yml", false);
         }
+        reloadConfig();
     }
 
     @Override
     public void onEnable() {
         reload();
+        if (getConfig().getInt("version", 1) != 2) {
+            List<String> lines = Arrays.asList(
+                    "# DamageIndicator Reborn, Minecraft plugin to show the damage taken by a entity",
+                    "# Source Code: https://github.com/Beelzebu/DamageIndicator",
+                    "# Issue Tracker: https://github.com/Beelzebu/DamageIndicator/issues",
+                    "",
+                    "# Config version, don't edit",
+                    "version: 2",
+                    "",
+                    "# Damage Indicator options, here you can define in what type of entities we",
+                    "# should show the damage indicators and completly disable this feature.",
+                    "Damage Indicator:",
+                    "  Enabled: true",
+                    "  Player: " + getConfig().getBoolean("UseAt.Player", true),
+                    "  Monster: " + getConfig().getBoolean("UseAt.Monster", true),
+                    "  Animals: " + getConfig().getBoolean("UseAt.Animals", true),
+                    "  # Use %health% for the regain health you get",
+                    "  # Use %damage% for the damage you get",
+                    "  Format:",
+                    "    EntityRegain: '" + getConfig().getString("Format.EntityRegain", "&7+&a%health%") + "'",
+                    "    EntityDamage: '" + getConfig().getString("Format.EntityDamage", "&7-&c%damage%") + "'",
+                    "    # Here you define the decimal format for the damage and health",
+                    "    # See https://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html",
+                    "    # for more information.",
+                    "    Decimal: '" + getConfig().getString("Format.Decimal", "#.##") + "'",
+                    "",
+                    "# Blood here you can completly disable this feature.",
+                    "Blood:",
+                    "  Enabled: true"
+            );
+            try {
+                Files.write(configFile.toPath(), lines, Charsets.UTF_8);
+                reloadConfig();
+                Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&eDamageIndicator config updated to v2."));
+            } catch (IOException ex) {
+                Logger.getLogger(DIMain.class.getName()).log(Level.WARNING, "Can't save config v2", ex);
+            }
+        }
         damageIndicatorListener = new DamageIndicatorListener(this);
         bloodListener = new BloodListener(this);
         Bukkit.getPluginManager().registerEvents(damageIndicatorListener, this);
