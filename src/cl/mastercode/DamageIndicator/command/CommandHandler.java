@@ -15,7 +15,7 @@
  */
 package cl.mastercode.DamageIndicator.command;
 
-import cl.mastercode.DamageIndicator.Main;
+import cl.mastercode.DamageIndicator.DIMain;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -32,7 +32,7 @@ import org.bukkit.entity.Player;
 @RequiredArgsConstructor
 public final class CommandHandler implements CommandExecutor {
 
-    private final Main plugin;
+    private final DIMain plugin;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String string, String[] strings) {

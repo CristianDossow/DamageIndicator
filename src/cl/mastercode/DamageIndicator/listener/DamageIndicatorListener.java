@@ -15,7 +15,7 @@
  */
 package cl.mastercode.DamageIndicator.listener;
 
-import cl.mastercode.DamageIndicator.Main;
+import cl.mastercode.DamageIndicator.DIMain;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import lombok.Getter;
@@ -47,7 +47,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 @RequiredArgsConstructor
 public class DamageIndicatorListener implements Listener {
 
-    private final Main plugin;
+    private final DIMain plugin;
     @Getter
     private final LinkedHashMap<ArmorStand, Long> armorStands = new LinkedHashMap<>();
 

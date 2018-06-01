@@ -31,7 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author YitanTribal, Beelzebu
  */
-public class Main extends JavaPlugin {
+public class DIMain extends JavaPlugin {
 
     private final ConsoleCommandSender console = Bukkit.getConsoleSender();
     private DamageIndicatorListener damageIndicatorListener;

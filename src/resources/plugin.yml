@@ -1,5 +1,5 @@
 name: DamageIndicator
-main: cl.mastercode.DamageIndicator.Main
+main: cl.mastercode.DamageIndicator.DIMain
 author: CristianDossow
 authors: [Beelzebu]
 version: ${project.version}

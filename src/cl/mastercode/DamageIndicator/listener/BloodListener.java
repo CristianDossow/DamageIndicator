@@ -15,7 +15,7 @@
  */
 package cl.mastercode.DamageIndicator.listener;
 
-import cl.mastercode.DamageIndicator.Main;
+import cl.mastercode.DamageIndicator.DIMain;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
@@ -45,7 +45,7 @@ import org.bukkit.util.Vector;
 @RequiredArgsConstructor
 public class BloodListener implements Listener {
 
-    private final Main plugin;
+    private final DIMain plugin;
     @Getter
     private final Map<Item, Long> bloodItems = new LinkedHashMap<>();
 
