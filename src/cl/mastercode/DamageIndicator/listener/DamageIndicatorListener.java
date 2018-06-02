@@ -20,12 +20,12 @@ import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -85,15 +85,21 @@ public class DamageIndicatorListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityRegainHealth(EntityRegainHealthEvent e) {
+        if (!(e.getEntity() instanceof LivingEntity)) {
+            return;
+        }
         if (!e.isCancelled()) {
-            handleArmorStand(e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityRegain").replace("%health%", damageFormat(e.getAmount()))), e.getEntity().getLocation());
+            handleArmorStand((LivingEntity) e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityRegain").replace("%health%", damageFormat(e.getAmount()))));
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamageEvent(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof LivingEntity)) {
+            return;
+        }
         if (!e.isCancelled()) {
-            handleArmorStand(e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityDamage").replace("%damage%", damageFormat(e.getFinalDamage()))), e.getEntity().getLocation());
+            handleArmorStand((LivingEntity) e.getEntity(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("Damage Indicator.Format.EntityDamage").replace("%damage%", damageFormat(e.getFinalDamage()))));
         }
     }
 
@@ -107,7 +113,7 @@ public class DamageIndicatorListener implements Listener {
         return df.format(o);
     }
 
-    private void handleArmorStand(Entity entity, String format, Location loc) {
+    private void handleArmorStand(LivingEntity entity, String format) {
         if (entity.hasMetadata("NPC")) {
             return;
         }
@@ -123,29 +129,34 @@ public class DamageIndicatorListener implements Listener {
         if (entity instanceof Animals && !enableAnimal) {
             return;
         }
-        armorStands.put(getDefaultArmorStand(loc, format), System.currentTimeMillis());
+        armorStands.put(getDefaultArmorStand(entity.getEyeLocation(), format), System.currentTimeMillis());
     }
 
     public ArmorStand getDefaultArmorStand(Location loc, String name) {
-        Location spawnLoc = new Location(loc.getWorld(), loc.getX(), 500, loc.getZ());
-        ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(spawnLoc, EntityType.ARMOR_STAND);
+        ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(/*new Location(loc.getWorld(), loc.getX(), 255, loc.getZ())*/loc, EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setCustomNameVisible(false);
         as.setSmall(true);
         as.setRemoveWhenFarAway(true);
         as.setMetadata("Mastercode-DamageIndicator", new FixedMetadataValue(plugin, 1));
         as.setGravity(false);
-        try {
+        if (!is18()) {
             as.setCollidable(false);
             as.setInvulnerable(true);
-        } catch (Exception oldVersion) {
         }
         as.setMarker(true);
-        as.teleport(loc.add(0.0, 1.6, 0.0));
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-            as.setCustomNameVisible(true);
-        }, 5);
+        as.teleport(loc.add(0, 2, 0));
         as.setCustomName(name);
+        as.setCustomNameVisible(true);
         return as;
+    }
+
+    private boolean is18() {
+        try {
+            ArmorStand.class.getMethod("setCollidable");
+            return false;
+        } catch (NoSuchMethodError | NoSuchMethodException | SecurityException ex) {
+            return true;
+        }
     }
 }
