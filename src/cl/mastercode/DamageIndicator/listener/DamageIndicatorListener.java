@@ -129,11 +129,11 @@ public class DamageIndicatorListener implements Listener {
         if (entity instanceof Animals && !enableAnimal) {
             return;
         }
-        armorStands.put(getDefaultArmorStand(entity.getEyeLocation(), format), System.currentTimeMillis());
+        armorStands.put(getDefaultArmorStand(is18() ? entity.getEyeLocation() : entity.getLocation(), format), System.currentTimeMillis());
     }
 
     public ArmorStand getDefaultArmorStand(Location loc, String name) {
-        ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(/*new Location(loc.getWorld(), loc.getX(), 255, loc.getZ())*/loc, EntityType.ARMOR_STAND);
+        ArmorStand as = (ArmorStand) loc.getWorld().spawnEntity(new Location(loc.getWorld(), loc.getX(), 200, loc.getZ()), EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setCustomNameVisible(false);
         as.setSmall(true);
@@ -145,7 +145,7 @@ public class DamageIndicatorListener implements Listener {
             as.setInvulnerable(true);
         }
         as.setMarker(true);
-        as.teleport(loc.add(0, 2, 0));
+        as.teleport(is18() ? loc.add(0, 2, 0) : loc.add(0, 1.6, 0));
         as.setCustomName(name);
         as.setCustomNameVisible(true);
         return as;
@@ -153,9 +153,10 @@ public class DamageIndicatorListener implements Listener {
 
     private boolean is18() {
         try {
-            ArmorStand.class.getMethod("setCollidable");
+            ArmorStand.class.getMethod("setCollidable", boolean.class);
             return false;
         } catch (NoSuchMethodError | NoSuchMethodException | SecurityException ex) {
+            ex.printStackTrace();
             return true;
         }
     }
