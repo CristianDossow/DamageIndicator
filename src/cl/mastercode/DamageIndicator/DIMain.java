@@ -131,6 +131,6 @@ public class DIMain extends JavaPlugin {
     }
 
     public boolean isDamageIndicator(ArmorStand as) {
-        return as.hasMetadata("Mastercode-DamageIndicator");
+        return as.hasMetadata("Mastercode-DamageIndicator") || (as.isMarker() && !as.isVisible() && as.isCustomNameVisible() && !as.hasGravity() && (as.getName().replaceAll("\\d", "").contains(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Damage Indicator.Format.EntityRegain").replace("%health%", ""))) || as.getName().replaceAll("\\d", "").contains(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Damage Indicator.Format.EntityDamage").replace("%damage%", "")))));
     }
 }

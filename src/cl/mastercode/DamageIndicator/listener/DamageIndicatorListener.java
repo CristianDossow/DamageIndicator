@@ -103,14 +103,14 @@ public class DamageIndicatorListener implements Listener {
         }
     }
 
-    private String damageFormat(Object o) {
+    private String damageFormat(double damage) {
         DecimalFormat df;
         try {
             df = new DecimalFormat(plugin.getConfig().getString("Damage Indicator.Format.Decimal", "#.##"));
         } catch (Exception ex) {
             df = new DecimalFormat("#.##");
         }
-        return df.format(o);
+        return df.format(damage);
     }
 
     private void handleArmorStand(LivingEntity entity, String format) {
