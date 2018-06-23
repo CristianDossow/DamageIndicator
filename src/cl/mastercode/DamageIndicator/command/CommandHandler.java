@@ -50,7 +50,7 @@ public final class CommandHandler implements CommandExecutor {
                     int range = GetInt(sender, strings[1]);
                     if (range >= 0) {
                         int c = 0;
-                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && plugin.isDamageIndicator((ArmorStand) entity))).map((entity) -> {
+                        c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && plugin.isDamageIndicator((ArmorStand) entity, false))).map((entity) -> {
                             entity.remove();
                             return entity;
                         }).map((_item) -> 1).reduce(c, Integer::sum);
