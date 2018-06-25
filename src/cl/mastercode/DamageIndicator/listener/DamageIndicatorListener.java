@@ -16,10 +16,13 @@
 package cl.mastercode.DamageIndicator.listener;
 
 import cl.mastercode.DamageIndicator.DIMain;
+import cl.mastercode.DamageIndicator.util.EntityHider;
+import cl.mastercode.DamageIndicator.util.EntityHider.Policy;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import lombok.Getter;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.ArmorStand;
@@ -48,13 +51,18 @@ public class DamageIndicatorListener implements Listener {
     private final DIMain plugin;
     @Getter
     private final LinkedHashMap<ArmorStand, Long> armorStands = new LinkedHashMap<>();
-    private final boolean enablePlayer, enableMonster, enableAnimal;
+    private final boolean enablePlayer, enableMonster, enableAnimal, protocollib;
+    private EntityHider hider;
 
     public DamageIndicatorListener(DIMain plugin) {
         this.plugin = plugin;
         enablePlayer = plugin.getConfig().getBoolean("Damage Indicator.Player");
         enableMonster = plugin.getConfig().getBoolean("Damage Indicator.Monster");
         enableAnimal = plugin.getConfig().getBoolean("Damage Indicator.Animals");
+        protocollib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
+        if (protocollib) {
+            hider = new EntityHider(plugin, Policy.BLACKLIST);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -148,6 +156,7 @@ public class DamageIndicatorListener implements Listener {
         as.teleport(is18() ? loc.add(0, 2, 0) : loc.add(0, 1.6, 0));
         as.setCustomName(name);
         as.setCustomNameVisible(true);
+        Bukkit.getOnlinePlayers().stream().filter(op -> !plugin.getStorageProvider().showArmorStand(op)).forEach(op -> hider.hideEntity(op, as));
         return as;
     }
 

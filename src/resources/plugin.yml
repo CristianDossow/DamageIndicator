@@ -3,6 +3,7 @@ main: cl.mastercode.DamageIndicator.DIMain
 author: CristianDossow
 authors: [Beelzebu]
 version: ${project.version}
+softdepend: [ProtocolLib]
 commands:
   damageindicator:
     description: Main DamageIndicator command

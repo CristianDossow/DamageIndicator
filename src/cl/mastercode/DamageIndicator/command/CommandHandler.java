@@ -38,16 +38,14 @@ public final class CommandHandler implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String string, String[] strings) {
         if (strings.length > 0) {
             if ("reload".equalsIgnoreCase(strings[0])) {
-                if (CheckPermissions(sender, "damageindicator.admin")) {
+                if (checkPermissions(sender, "damageindicator.admin")) {
                     plugin.reload();
                     sender.sendMessage(ChatColor.GREEN + "Reloaded config!");
                     return true;
                 }
             } else if ("clear".equalsIgnoreCase(strings[0])) {
-                if (IsPlayer(sender)
-                        && (CheckPermissions(sender, "damageindicator.clear") || CheckPermissions(sender, "damageindicator.admin"))
-                        && CheckArguments(sender, strings.length, 2)) {
-                    int range = GetInt(sender, strings[1]);
+                if (isPlayer(sender) && (checkPermissions(sender, "damageindicator.clear") || checkPermissions(sender, "damageindicator.admin")) && checkArguments(sender, strings.length, 2)) {
+                    int range = getInt(sender, strings[1]);
                     if (range >= 0) {
                         int c = 0;
                         c = ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand && plugin.isDamageIndicator((ArmorStand) entity, false))).map((entity) -> {
@@ -59,7 +57,7 @@ public final class CommandHandler implements CommandExecutor {
                     }
                 }
             } else if ("clearall".equalsIgnoreCase(strings[0])) {
-                if (IsPlayer(sender) && (CheckPermissions(sender, "damageindicator.admin"))) {
+                if (isPlayer(sender) && (checkPermissions(sender, "damageindicator.admin"))) {
                     int c = 0;
                     c = ((Player) sender).getLocation().getWorld().getEntitiesByClass(org.bukkit.entity.ArmorStand.class).stream().filter((as) -> (plugin.isDamageIndicator(as))).map((as) -> {
                         as.remove();
@@ -68,11 +66,17 @@ public final class CommandHandler implements CommandExecutor {
                     sender.sendMessage(ChatColor.GREEN + "" + c + " Damage Indicators were removed in " + ((Player) sender).getLocation().getWorld().getName());
                     return true;
                 }
+            } else if ("toggle".equalsIgnoreCase(strings[0])) {
+                if (isPlayer(sender)) {
+                    boolean status = !plugin.getStorageProvider().showArmorStand((Player) sender);
+                    plugin.getStorageProvider().setShowArmorStand((Player) sender, status);
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7Your damage indicator show status has changed to: " + (status ? "&aenabled" : "&cdisabled")));
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis command can't be executed from console."));
+                }
             } else if ("debug".equalsIgnoreCase(strings[0])) {
-                if (IsPlayer(sender)
-                        && (CheckPermissions(sender, "damageindicator.admin"))
-                        && CheckArguments(sender, strings.length, 2)) {
-                    int range = GetInt(sender, strings[1]);
+                if (isPlayer(sender) && (checkPermissions(sender, "damageindicator.admin")) && checkArguments(sender, strings.length, 2)) {
+                    int range = getInt(sender, strings[1]);
                     if (range >= 0) {
                         ((Player) sender).getNearbyEntities(range, range, range).stream().filter((entity) -> (entity instanceof ArmorStand)).map((entity) -> (ArmorStand) entity).map((as) -> {
                             sender.sendMessage("Dysplay Name: " + as.getCustomName());
@@ -111,16 +115,16 @@ public final class CommandHandler implements CommandExecutor {
                 }
             }
         } else {
-            String version = Bukkit.getServer().getPluginManager().getPlugin("DamageIndicator").getDescription().getVersion();
-            sender.sendMessage(ChatColor.DARK_AQUA + "<===== Damage Indicator " + version + " =====>");
+            sender.sendMessage(ChatColor.DARK_AQUA + "<===== Damage Indicator " + Bukkit.getServer().getPluginManager().getPlugin("DamageIndicator").getDescription().getVersion() + " =====>");
             sender.sendMessage(ChatColor.DARK_AQUA + "/di reload");
             sender.sendMessage(ChatColor.DARK_AQUA + "/di clear <range> " + ChatColor.AQUA + "#remove the damage indicators in the range");
             sender.sendMessage(ChatColor.DARK_AQUA + "/di clearall " + ChatColor.AQUA + "#remove the damage indicators in the world (may cause lag)");
+            sender.sendMessage(ChatColor.DARK_AQUA + "/di toggle " + ChatColor.AQUA + "#enable/disable damage indicators for you");
         }
         return true;
     }
 
-    public static boolean IsPlayer(CommandSender sender) {
+    public static boolean isPlayer(CommandSender sender) {
         if (sender instanceof Player) {
             return true;
         }
@@ -128,7 +132,7 @@ public final class CommandHandler implements CommandExecutor {
         return false;
     }
 
-    public static boolean CheckPermissions(CommandSender sender, String permission) {
+    public static boolean checkPermissions(CommandSender sender, String permission) {
         if (sender.hasPermission(permission)) {
             return true;
         }
@@ -136,7 +140,7 @@ public final class CommandHandler implements CommandExecutor {
         return false;
     }
 
-    public static boolean CheckArguments(CommandSender sender, int args, int num) {
+    public static boolean checkArguments(CommandSender sender, int args, int num) {
         if (args != num) {
             sender.sendMessage(ChatColor.RED + "Invalid number of arguments");
             return false;
@@ -144,7 +148,7 @@ public final class CommandHandler implements CommandExecutor {
         return true;
     }
 
-    public static int GetInt(CommandSender sender, String text) {
+    public static int getInt(CommandSender sender, String text) {
         int amount;
         try {
             amount = Integer.parseInt(text);

@@ -18,7 +18,8 @@ package cl.mastercode.DamageIndicator;
 import cl.mastercode.DamageIndicator.command.CommandHandler;
 import cl.mastercode.DamageIndicator.listener.BloodListener;
 import cl.mastercode.DamageIndicator.listener.DamageIndicatorListener;
-import com.google.common.base.Charsets;
+import cl.mastercode.DamageIndicator.storage.SimpleStorageProvider;
+import cl.mastercode.DamageIndicator.storage.StorageProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,9 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.md_5.bungee.api.ChatColor;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -43,14 +47,24 @@ public class DIMain extends JavaPlugin {
     private final File configFile = new File(getDataFolder(), "config.yml");
     private DamageIndicatorListener damageIndicatorListener;
     private BloodListener bloodListener;
+    @Getter
+    @Setter
+    private StorageProvider storageProvider = null;
 
     public void reload() {
         if (damageIndicatorListener != null) {
             damageIndicatorListener.getArmorStands().forEach((armor, time) -> armor.remove());
             damageIndicatorListener.getArmorStands().clear();
         }
+        if (bloodListener != null) {
+            bloodListener.getBloodItems().forEach((item, time) -> item.remove());
+            bloodListener.getBloodItems().clear();
+        }
         if (!configFile.exists()) {
             saveResource("config.yml", false);
+        }
+        if (storageProvider == null) {
+            storageProvider = new SimpleStorageProvider();
         }
         reloadConfig();
     }
@@ -58,6 +72,22 @@ public class DIMain extends JavaPlugin {
     @Override
     public void onEnable() {
         reload();
+        updateConfig();
+        damageIndicatorListener = new DamageIndicatorListener(this);
+        bloodListener = new BloodListener(this);
+        Bukkit.getPluginManager().registerEvents(damageIndicatorListener, this);
+        Bukkit.getPluginManager().registerEvents(bloodListener, this);
+        getCommand("damageindicator").setExecutor(new CommandHandler(this));
+        startTasks();
+    }
+
+    @Override
+    public void onDisable() {
+        damageIndicatorListener.getArmorStands().forEach((armor, time) -> armor.remove());
+        bloodListener.getBloodItems().forEach((item, time) -> item.remove());
+    }
+
+    private void updateConfig() {
         if (getConfig().getInt("version", 1) != 2) {
             List<String> lines = Arrays.asList(
                     "# DamageIndicator Reborn, Minecraft plugin to show the damage taken by a entity",
@@ -89,19 +119,16 @@ public class DIMain extends JavaPlugin {
                     "  Enabled: true"
             );
             try {
-                Files.write(configFile.toPath(), lines, Charsets.UTF_8);
+                Files.write(configFile.toPath(), lines);
                 reloadConfig();
                 Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&eDamageIndicator config updated to v2."));
             } catch (IOException ex) {
                 Logger.getLogger(DIMain.class.getName()).log(Level.WARNING, "Can't save config v2", ex);
             }
         }
-        damageIndicatorListener = new DamageIndicatorListener(this);
-        bloodListener = new BloodListener(this);
-        Bukkit.getPluginManager().registerEvents(damageIndicatorListener, this);
-        Bukkit.getPluginManager().registerEvents(bloodListener, this);
-        getCommand("damageindicator").setExecutor(new CommandHandler(this));
+    }
 
+    private void startTasks() {
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             Iterator<Map.Entry<ArmorStand, Long>> asit = damageIndicatorListener.getArmorStands().entrySet().iterator();
             while (asit.hasNext()) {
@@ -124,17 +151,15 @@ public class DIMain extends JavaPlugin {
         }, 0, 1);
     }
 
-    @Override
-    public void onDisable() {
-        damageIndicatorListener.getArmorStands().forEach((armor, time) -> armor.remove());
-        bloodListener.getBloodItems().forEach((item, time) -> item.remove());
+    public boolean isDamageIndicator(Entity entity) {
+        return isDamageIndicator(entity, true);
     }
 
-    public boolean isDamageIndicator(ArmorStand as) {
-        return isDamageIndicator(as, true);
-    }
-
-    public boolean isDamageIndicator(ArmorStand as, boolean strict) {
+    public boolean isDamageIndicator(Entity entity, boolean strict) {
+        if (!(entity instanceof ArmorStand)) {
+            return false;
+        }
+        ArmorStand as = (ArmorStand) entity;
         return as.hasMetadata("Mastercode-DamageIndicator") || !strict && (as.isMarker() && !as.isVisible() && as.isCustomNameVisible() && !as.hasGravity());
     }
 }
