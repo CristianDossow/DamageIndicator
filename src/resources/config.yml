@@ -6,7 +6,7 @@
 version: 2
 
 # Damage Indicator options, here you can define in what type of entities we
-# should show the damage indicators and completly disable this feature.
+# should show the damage indicators and completely disable this feature.
 Damage Indicator:
   Enabled: true
   Player: true
@@ -22,6 +22,11 @@ Damage Indicator:
     # for more information.
     Decimal: '#.##'
 
-# Blood here you can completly disable this feature.
+# Blood here you can completely disable this feature.
 Blood:
   Enabled: true
+
+Messages:
+  Damage Indicator:
+    Enabled: '&7Your damage indicator show status has changed to: &aenabled'
+    Disabled: '&7Your damage indicator show status has changed to: &cdisabled'
