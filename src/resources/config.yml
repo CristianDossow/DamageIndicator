@@ -1,0 +1,32 @@
+# DamageIndicator Reborn, Minecraft plugin to show the damage taken by a entity
+# Source Code: https://github.com/Beelzebu/DamageIndicator
+# Issue Tracker: https://github.com/Beelzebu/DamageIndicator/issues
+
+# Config version, don't edit
+version: 2
+
+# Damage Indicator options, here you can define in what type of entities we
+# should show the damage indicators and completely disable this feature.
+Damage Indicator:
+  Enabled: true
+  Player: true
+  Monster: true
+  Animals: true
+  # Use %health% for the regain health you get
+  # Use %damage% for the damage you get
+  Format:
+    EntityRegain: '&7+&a%health%'
+    EntityDamage: '&7-&c%damage%'
+    # Here you define the decimal format for the damage and health
+    # See https://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html
+    # for more information.
+    Decimal: '#.##'
+
+# Blood here you can completely disable this feature.
+Blood:
+  Enabled: true
+
+Messages:
+  Damage Indicator:
+    Enabled: '&7Your damage indicator show status has changed to: &aenabled'
+    Disabled: '&7Your damage indicator show status has changed to: &cdisabled'

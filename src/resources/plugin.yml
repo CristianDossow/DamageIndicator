@@ -1,12 +1,14 @@
 name: DamageIndicator
-main: cl.mastercode.DamageIndicator.Main
+main: cl.mastercode.DamageIndicator.DIMain
 author: CristianDossow
+authors: [Beelzebu]
 version: ${project.version}
+softdepend: [ProtocolLib]
 commands:
   damageindicator:
     description: Main DamageIndicator command
     usage: /<command> <arguments>
-    aliases: [di, DamageIndicator]
+    aliases: [di]
 permissions:
   damageindicator.admin:
     description: Access to admin commands
